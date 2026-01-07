@@ -75,6 +75,85 @@ def get_crypto_price():
         print(f"\nCoin '{coin_id}' not found!")
         print("Try: btc-bitcoin, eth-ethereum, doge-dogecoin")
 
+def get_weather_by_city():
+    """Fetch current weather for a city using Open-Meteo APIs."""
+    print("\n=== Weather Checker ===\n")
+
+    city = input("Enter city name: ").strip()
+
+    # STEP 1: Convert city name → latitude & longitude (Geocoding)
+    geo_url = "https://geocoding-api.open-meteo.com/v1/search"
+    geo_params = {
+        "name": city,
+        "count": 1
+    }
+
+    geo_response = requests.get(geo_url, params=geo_params)
+
+    if geo_response.status_code != 200:
+        print("Failed to fetch location data.")
+        return
+
+    geo_data = geo_response.json()
+
+    if "results" not in geo_data:
+        print(f"City '{city}' not found!")
+        return
+
+    location = geo_data["results"][0]
+    latitude = location["latitude"]
+    longitude = location["longitude"]
+    country = location["country"]
+
+    # STEP 2: Fetch weather using coordinates
+    weather_url = "https://api.open-meteo.com/v1/forecast"
+    weather_params = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "current_weather": True
+    }
+
+    weather_response = requests.get(weather_url, params=weather_params)
+
+    if weather_response.status_code != 200:
+        print("Failed to fetch weather data.")
+        return
+
+    weather_data = weather_response.json()
+    current = weather_data["current_weather"]
+
+    print(f"\n--- Weather in {city}, {country} ---")
+    print(f"Temperature: {current['temperature']}°C")
+    print(f"Wind Speed: {current['windspeed']} km/h")
+    print(f"Weather Code: {current['weathercode']}")
+
+def search_todos_by_status():
+    """Search todos by completion status."""
+    print("\n=== Todo Status Search ===\n")
+
+    status = input("Show completed todos? (true/false): ").lower().strip()
+
+    if status not in ("true", "false"):
+        print("Invalid input. Please enter 'true' or 'false'.")
+        return
+
+    url = "https://jsonplaceholder.typicode.com/todos"
+    params = {"completed": status}
+
+    response = requests.get(url, params=params)
+
+    if response.status_code != 200:
+        print("Failed to fetch todos.")
+        return
+
+    todos = response.json()
+
+    print(f"\n--- Todos (completed = {status}) ---")
+    for todo in todos[:10]:  # limit output
+        print(f"- [{todo['completed']}] {todo['title']}")
+
+
+
 
 def main():
     """Main menu for the program."""
@@ -87,9 +166,12 @@ def main():
         print("1. Look up user info")
         print("2. Search posts by user")
         print("3. Check crypto price")
-        print("4. Exit")
+        print("4. Check weather by city")
+        print("5. Search todos by status")
 
-        choice = input("\nEnter choice (1-4): ")
+        print("6. Exit")
+
+        choice = input("\nEnter choice (1-6): ")
 
         if choice == "1":
             get_user_info()
@@ -98,10 +180,18 @@ def main():
         elif choice == "3":
             get_crypto_price()
         elif choice == "4":
+           get_weather_by_city()
+        elif choice == "5":
+          search_todos_by_status()
+
+
+        elif choice == "6":
             print("\nGoodbye!")
             break
         else:
             print("Invalid choice. Please try again.")
+
+
 
 
 if __name__ == "__main__":

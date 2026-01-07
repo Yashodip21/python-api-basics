@@ -49,6 +49,7 @@ print(f"City: {data['address']['city']}")
 print(f"Company: {data['company']['name']}")
 
 
+
 # Example 4: Working with a list of items
 print("\n--- Example 4: List of Items ---")
 url_list = "https://jsonplaceholder.typicode.com/posts?userId=1"
@@ -58,6 +59,43 @@ posts = response.json()
 print(f"User 1 has {len(posts)} posts:")
 for i, post in enumerate(posts[:3], 1):  # Show first 3
     print(f"  {i}. {post['title'][:40]}...")
+
+# Exercise 1
+print("\n Fetch user with ID 5 and print their phone number")
+url_list="https://jsonplaceholder.typicode.com/users/5"
+response=requests.get(url_list)
+posts=response.json()
+#Acces phone number
+print(f"Phone: {data['phone']}")
+
+# Excercise2
+print("\n Check if a resource exists before printing data")
+url = "https://jsonplaceholder.typicode.com/posts/1"
+response = requests.get(url)
+
+if response.status_code == 200:
+    data = response.json()
+    print("Data found:")
+    print(data)
+else:
+    print("Resource not found!")
+    print("Status Code:", response.status_code)
+
+
+# Excercise 3 count how many comments
+  
+
+ 
+
+
+
+
+
+
+
+
+
+
 
 
 # --- COMMON STATUS CODES ---

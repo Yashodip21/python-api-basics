@@ -14,19 +14,41 @@ import requests
 from datetime import datetime
 
 
+
+
 # City coordinates (latitude, longitude)
 CITIES = {
+    # 🇮🇳 India
     "delhi": (28.6139, 77.2090),
     "mumbai": (19.0760, 72.8777),
     "bangalore": (12.9716, 77.5946),
     "chennai": (13.0827, 80.2707),
     "kolkata": (22.5726, 88.3639),
     "hyderabad": (17.3850, 78.4867),
+    "pune": (18.5204, 73.8567),
+    "ahmedabad": (23.0225, 72.5714),
+    "jaipur": (26.9124, 75.7873),
+    "indore": (22.7196, 75.8577),
+    "nagpur": (21.1458, 79.0882),
+    "nashik": (19.9975, 73.7898),
+
+    # International
     "new york": (40.7128, -74.0060),
+    "los angeles": (34.0522, -118.2437),
+    "chicago": (41.8781, -87.6298),
     "london": (51.5074, -0.1278),
+    "paris": (48.8566, 2.3522),
+    "berlin": (52.5200, 13.4050),
+    "rome": (41.9028, 12.4964),
     "tokyo": (35.6762, 139.6503),
+    "seoul": (37.5665, 126.9780),
+    "beijing": (39.9042, 116.4074),
+    "singapore": (1.3521, 103.8198),
+    "dubai": (25.2048, 55.2708),
     "sydney": (-33.8688, 151.2093),
+    "melbourne": (-37.8136, 144.9631),
 }
+
 
 # Popular cryptocurrencies
 CRYPTO_IDS = {
@@ -47,7 +69,10 @@ def get_weather(city_name):
 
     if city_lower not in CITIES:
         print(f"\nCity '{city_name}' not found.")
-        print(f"Available cities: {', '.join(CITIES.keys())}")
+        # print(f"Available cities: {', '.join(CITIES.keys())}")
+        print("Available cities:")
+        print(", ".join(CITIES.keys()).replace(", ", "\n"))
+
         return None
 
     lat, lon = CITIES[city_lower]
@@ -101,6 +126,10 @@ def display_weather(city_name):
     condition = weather_codes.get(code, "Unknown")
     print(f"  Condition: {condition}")
     print(f"{'=' * 40}")
+    
+    
+    save_to_json(data, "weather_result.json")
+
 
 
 def get_crypto_price(coin_name):
@@ -146,6 +175,9 @@ def display_crypto(coin_name):
     print(f"  7d Change:  {usd['percent_change_7d']:+.2f}%")
     print(f"{'=' * 40}")
 
+    save_to_json(data, "crypto_result.json")
+
+
 
 def get_top_cryptos(limit=5):
     """Fetch top cryptocurrencies by market cap."""
@@ -183,6 +215,122 @@ def display_top_cryptos():
 
     print(f"{'=' * 55}")
 
+def compare_cryptos():
+    """Compare prices of multiple cryptocurrencies."""
+    print("\n=== Compare Cryptocurrency Prices ===\n")
+    print(f"Available: {', '.join(CRYPTO_IDS.keys())}")
+
+    coins_input = input(
+        "Enter crypto names separated by comma (e.g. bitcoin, ethereum, solana): "
+    )
+
+    coins = [c.strip().lower() for c in coins_input.split(",") if c.strip()]
+
+    if len(coins) < 2:
+        print("Please enter at least two cryptocurrencies.")
+        return
+
+    results = []
+
+    for coin in coins:
+        data = get_crypto_price(coin)
+        if not data:
+            print(f"Skipping invalid coin: {coin}")
+            continue
+
+        usd = data["quotes"]["USD"]
+        results.append({
+            "name": data["name"],
+            "symbol": data["symbol"],
+            "price": usd["price"],
+            "change_24h": usd["percent_change_24h"],
+            "market_cap": usd["market_cap"],
+        })
+
+    if not results:
+        print("No valid cryptocurrency data found.")
+        return
+
+    # Display table
+    print(f"\n{'=' * 80}")
+    print(f"{'Name':<15}{'Symbol':<10}{'Price ($)':<15}{'24h Change':<15}{'Market Cap ($)'}")
+    print(f"{'-' * 80}")
+
+    for r in results:
+        print(
+            f"{r['name']:<15}"
+            f"{r['symbol']:<10}"
+            f"{r['price']:<15,.2f}"
+            f"{r['change_24h']:+<15.2f}"
+            f"{r['market_cap']:,.0f}"
+        )
+
+    print(f"{'=' * 80}")
+def create_post():
+    """Create a new post using a POST request."""
+    print("\n=== Create a New Post ===\n")
+
+    title = input("Enter post title: ").strip()
+    body = input("Enter post content: ").strip()
+
+    if not title or not body:
+        print("Title and content cannot be empty.")
+        return
+
+    url = "https://jsonplaceholder.typicode.com/posts"
+
+    payload = {
+        "title": title,
+        "body": body,
+        "userId": 1
+    }
+
+    try:
+        response = requests.post(url, json=payload, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        print("\n--- Post Created Successfully ---")
+        print(f"Post ID: {data['id']}")
+        print(f"Title: {data['title']}")
+        print(f"Body: {data['body']}")
+        print(f"User ID: {data['userId']}")
+
+    except requests.RequestException as e:
+        print(f"Error creating post: {e}")
+
+
+        save_to_json(data, "created_post.json")
+
+
+def save_to_json(data, filename):
+    if not data:
+        print("No data to save.")
+        return
+
+    try:
+        with open(filename, "w") as f:
+            json.dump(data, f, indent=2)
+        print(f"Data saved to {filename}")
+    except Exception as e:
+        print("Error saving file:", e)
+
+def display_weather_openweather(city_name):
+    data = get_weather_openweather(city_name)
+
+    if not data:
+        return
+
+    print("\n=== Weather (OpenWeatherMap) ===")
+    print(f"City: {data['name']}")
+    print(f"Temperature: {data['main']['temp']}°C")
+    print(f"Feels Like: {data['main']['feels_like']}°C")
+    print(f"Humidity: {data['main']['humidity']}%")
+    print(f"Condition: {data['weather'][0]['description'].title()}")
+
+
+
+
 
 def dashboard():
     """Interactive dashboard combining weather and crypto."""
@@ -197,9 +345,13 @@ def dashboard():
         print("  2. Check Crypto Price")
         print("  3. View Top 5 Cryptos")
         print("  4. Quick Dashboard (Delhi + Bitcoin)")
-        print("  5. Exit")
+        print("  5. Compare Crypto Prices")
+        print("  6. Create a New Post (POST request)")
+        print("  7. Weather using OpenWeatherMap (API Key)")
 
-        choice = input("\nSelect (1-5): ").strip()
+        print("  8. Exit")
+
+        choice = input("\nSelect (1-8): ").strip()
 
         if choice == "1":
             print(f"\nAvailable: {', '.join(CITIES.keys())}")
@@ -217,8 +369,16 @@ def dashboard():
         elif choice == "4":
             display_weather("delhi")
             display_crypto("bitcoin")
-
         elif choice == "5":
+           compare_cryptos()
+        elif choice == "6":
+              create_post()
+        elif choice == "7":
+          city = input("Enter city name: ")
+          display_weather_openweather(city)
+
+
+        elif choice == "8":
             print("\nGoodbye! Happy coding!")
             break
 
