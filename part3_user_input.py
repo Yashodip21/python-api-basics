@@ -74,7 +74,10 @@ def get_crypto_price():
     else:
         print(f"\nCoin '{coin_id}' not found!")
         print("Try: btc-bitcoin, eth-ethereum, doge-dogecoin")
-
+# Exercise 1: Add a function to fetch weather for a city
+#             Use Open-Meteo API (no key required):
+#             https://api.open-meteo.com/v1/forecast?latitude=28.61&longitude=77.23&current_weather=true
+#             Challenge: Let user input city name (you'll need to find lat/long)
 def get_weather_by_city():
     """Fetch current weather for a city using Open-Meteo APIs."""
     print("\n=== Weather Checker ===\n")

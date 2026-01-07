@@ -12,7 +12,11 @@ Learn:
 
 import requests
 from datetime import datetime
+import os
+OPENWEATHER_API_KEY = os.environ.get("0d31f1e5a83582e6f9b38fac39051026")
 
+if not OPENWEATHER_API_KEY:
+    print("ERROR: OpenWeather API key not found in environment variables.")
 
 
 
