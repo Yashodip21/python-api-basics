@@ -84,20 +84,6 @@ else:
 
 # Excercise 3 count how many comments
   
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
 # --- COMMON STATUS CODES ---
 print("\n--- Common HTTP Status Codes ---")
 status_codes = {
